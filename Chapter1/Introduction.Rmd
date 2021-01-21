@@ -1,0 +1,292 @@
+---
+title: "第1章 简介"
+documentclass: ctexart
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  pdf_document:
+    toc: yes
+    latex_engine: xelatex
+  html_notebook: default
+---
+# 第一章 简介
+## 1.2 R简介
+### 1.2.1 R起步
+首先安装本书提供的R包，该包包括本书用到的数据集和多个函数。
+```{r}
+# install.packages("DMwR")
+# update.packages()
+```
+
+### 1.2.2 R对象
+```{r}
+a <- 1 
+ls()  #列举当前内存中的对象
+objects()
+rm(a) #删除对象a
+```
+### 1.2.3 向量
+```{r}
+# 使用c()函数和相应的参数创建向量
+v <- c(4, 7, 23.5, 76.2, 80)
+v
+length(v)
+mode(v)
+class(v)
+```
+一个向量的所有元素都必须属于同一类型，若不是，R会强制执行类型转换。
+```{r}
+v <- c(4, 7, 23.5, 76.2, 80, "rrt")
+v
+```
+### 1.2.5 因子
+
+因子用水平来表示所有可能的取值，可以用来处理分类（名义）数据。
+```{r}
+g <- c("f", "m", "m", "m", "f", "m", "f", "m", "f", "f") #性别向量
+g
+```
+```{r}
+g <- factor(g) #转换为一个因子
+g
+```
+假设有另外5个人，需要把他们的性别信息存储在另一个因子对象中，假设他们都是男性。如果按照如下设置：
+```{r}
+other.g <- factor(c("m", "m", "m", "m", "m"))
+other.g
+```
+结果显示因子对象other.g只有一个水平，若需要other.g与对象g一样具有两个相同的因子水平，必须使用如下命令：
+```{r}
+other.g <- factor(c("m", "m", "m", "m", "m"), levels = c("f", "m"))
+other.g
+```
+利用因子类型数据，可以计算每个可能值的发生次数，
+```{r}
+table(g)
+```
+table()函数也可以用于获取多个因子的交叉表。假设因子a存储10个人的年龄，那么可以得到这两个向量的交叉表：
+```{r}
+a <- factor(c("adult", "adult", "juvenile", "juvenile", "adult","adult", "adult", "juvenile", "adult", "juvenile"))
+table(a, g)
+```
+计算列联表的边际和相对频率：
+```{r}
+t <- table(a, g)
+margin.table(t, 1) # 1表示行，2表示列
+margin.table(t, 2)
+```
+```{r}
+prop.table(t, 1)
+prop.table(t, 2)* 100
+```
+### 1.2.6 生成序列
+
+```{r}
+x <- 1:10
+x
+10:15 - 1  # ":" 的优先级高于减法
+10:(15-1)
+5:0
+```
+```{r}
+seq(-4, 1, 0.5)
+seq(1, 5, length = 4)
+seq(length = 10, from = -2, by = 0.2)
+```
+```{r}
+rep(5,4)
+rep("hi", 3)
+rep(1:2, 3)
+rep(1:2, each = 3)
+```
+gl()函数可用于生成带有因子的序列，gl(k, n)，其中k是因子个数， n是每个水平的重复数。
+```{r}
+gl(3,5)
+gl(2,5, labels = c("female", "male"))
+```
+许多可以根据不同概率密度函数来生成随机序列的函数：
+```{r}
+rnorm(10) #10个服从均值为0，标准差为1正太分布的随机数值
+rnorm(4, mean = 10, sd = 3)
+rt(5, df = 10)
+```
+### 1.2.7 数据子集
+```{r}
+x <- c(0, -3, 4, -1, 45, 90, -5)
+x[x > 0]
+x[ x <= -2 | x > 5]  # 逻辑或
+x[ x > 40 & x < 100] #逻辑与
+x[c(4, 6)]
+x[1:3]
+x[-1] #表示删除第一个元素
+x[-(1:3)]
+x[- c(4,6)]
+```
+可通过R函数names()给向量中元素命名
+```{r}
+pH <- c(4.5, 7, 7.3, 8.2, 6.3)
+names(pH) <- c("area1", "area2", "mud", "dam", "middle")
+pH
+```
+```{r}
+pH <- c(area1 = 4.5, area2 = 7, mud = 7.3, dam = 8.2, middle = 6.3)
+pH
+pH["mud"]
+pH[c("area1", "area2")]
+```
+### 1.2.8 矩阵和数组
+
+```{r}
+m <- matrix(c(45,23,66,77,33,44,56,12,78,23), 2,5)
+m
+```
+注意到，向量中的数据通过矩阵中的列进行扩展。首先将数据填到第一列，然后填到第二列，以此类推。也可以设定函数matrix()的参数进行按行填充：
+```{r}
+m <- matrix(c(45,23,66,77,33,44,56,12,78,23), 2,5, byrow = T)
+m
+```
+```{r}
+m[2, 3]
+m[-2, 1]
+m[1, -c(3, 5)]
+m[1,]
+```
+按照上面操作，得到的结果可能是一个向量，可以使用下面命令使结果仍为一个矩阵
+```{r}
+class(m[1, ])
+m[1, , drop = F]
+class(m[1, , drop = F])
+```
+可以使用函数cbind()和rbind()分别按列和行把两个或两个以上的向量合并。
+```{r}
+m1 <- c(1,2)
+m2 <- c(3,4)
+cbind(m1, m2)
+rbind(m1, m2)
+```
+可以使用colnames()和rownames()给矩阵的行和列命名：
+```{r}
+colnames(m) <- c("c1", "c2", "c3", "c4", "c5")
+rownames(m) <- c("r1", "r2")
+m
+```
+数组是矩阵的扩展，它把数据维度扩展到两个以上。这意味数组中的元素需要两个以上的索引。可以使用函数array()创建数组。
+```{r}
+a <- array(1:24, dim = c(4, 3, 2))
+a
+```
+```{r}
+a[1,3,2]
+a[1, , 2]
+a[c(2, 3), , -2]
+```
+### 1.2.9 列表
+
+列表的成分和向量元素不同，它们不一定是同一种数据类型、模式或者相同长度。
+```{r}
+my.lst <- list(stud.id = 34453, stud.name = "John", stud.marks = c(14.3, 12, 15, 19))
+my.lst$stud.id
+my.lst[[1]]  #双方括号
+my.lst[1]
+```
+```{r}
+names(my.lst)
+names(my.lst) <- c("id", "names", "marks")
+my.lst
+# 添加元素，扩展列表
+my.lst$parents.names <- c("Ana", "Mike")
+my.lst
+```
+```{r}
+my.lst <- my.lst[-1] #剔除列表成分
+my.lst
+```
+通过函数c()合并列表
+```{r}
+other <- list(age = 19, sex = "male")
+lst <- c(my.lst, other)
+lst
+```
+可以通过函数unlist()把列表中所有元素转换为向量元素，转换后的向量元素个数和列表中所有数据对象个数相同，并且会把列表中不同类型数据统一，觉得多数情况下会转换为字符型。
+```{r}
+unlist(my.lst)
+```
+### 1.2.10 数据框
+数据框结构类似于二维矩阵，不同的是，数据框每列可以有不同的数据类型的数据，在这个意义上，数据框和列表相似。对R而言，数据框是一类特殊的列表。
+```{r}
+my.dataset <- data.frame(site = c("A", "B", "A", "A", "B"), season = c("Winter", "Summer", "Summer", "Spring", "Fall"), pH = c(7.4, 6.3, 8.6, 7.2, 8.9))
+my.dataset
+```
+```{r}
+my.dataset[my.dataset$pH > 7, ]
+```
+可以使用函数attach()简化查询。attach()函数可以直接访问数据框的列，无需添加相应的数据框名：
+```{r}
+attach(my.dataset)
+my.dataset[pH > 7, ]
+```
+```{r}
+season
+```
+函数attach()的反向操作是函数detach()，它禁止直接访问数据框的列。
+```{r}
+detach(my.dataset)
+# season
+```
+如果要该表数据框中数据的值：
+```{r}
+my.dataset[my.dataset$season == "Summer", "pH"] <- my.dataset[my.dataset$season == "Summer", "pH"] + 1
+my.dataset
+```
+加入新列：
+```{r}
+my.dataset$NO3 <- c(2,3,4,5,6)
+my.dataset
+```
+```{r}
+nrow(my.dataset)
+ncol(my.dataset)
+```
+可以使用函数data()获取R内置数据集的信息，使用data(USArrests)获取数据集USArrests。
+
+### 1.2.11 构建新函数
+
+在创建新函数前，需要检查R中是否已经有一个同名的函数存在。如果的确有同名的函数存在，那么可以选择一个不同的名称；否则，会把R中已经存在的R函数对用户隐藏起来。此时R标准函数仍然存在，但是搜索路径中与它具有相同名称的用户定义函数位于顶部，因此“隐藏”了R的标准函数。
+
+检查某个函数是否在R中存在，在命令提示符处输入函数名即可：
+```{r}
+# se
+```
+创建函数的基本形式：function(<set of parameters>) { <set of R instructions> }  
+
+函数的返回值可以由函数return()确定，或者R返回函数中最后运算表达式的结果。
+
+### 1.2.13 管理R会话
+假设当前工作目录中有一个名称为"mycode.R"的文本文件，可以使用如下命令执行文件
+```{r}
+# source('mycode.R')
+```
+
+有时可能需要保存对象以备以后应用，比如在名称为mysession.RData的文件中保存了名为f和my.dataset的两个对象：
+```{r}
+# save(f, my.dataset, file = "mysession.RData")
+```
+
+在新的R会话中，可以使用如下命令重新读入这些对象：
+```{r}
+# load("mysession.RData")
+```
+
+也可以使用下面命令来保存当前R工作空间中所有对象：
+```{r}
+save.image()
+```
+上面命令会在当前工作目录中把R工作空间保存为".RData"的文件。从该目录启动R时，该文件会自动载入R中。注意：当R退出时，如果回答“是”，会达到上面相同效果。
+
+
+
+
+
+
+
